@@ -19,7 +19,7 @@ class HashTable:
 
     def __init__(self, storage):
         self.storage = [None] * storage
-        self.capacity = len(self.storage)
+        self.capacity = storage
 
     def fnv1(self, key):
         """
@@ -92,6 +92,11 @@ class HashTable:
 
         Implement this.
         """
+        self.storage = self.storage * 2
+        self.capacity = self.capacity * 2
+        # for i in range(self.capacity//2):
+        #     print(i, self.storage[i].key, self.storage[i].value)
+        #     index = self.djb2(self.storage[i].key)
 
 
 if __name__ == "__main__":
