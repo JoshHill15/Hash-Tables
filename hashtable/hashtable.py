@@ -17,6 +17,10 @@ class HashTable:
     Implement this.
     """
 
+    def __init__(self, storage):
+        self.storage = [None] * storage
+        self.capacity = len(self.storage)
+
     def fnv1(self, key):
         """
         FNV-1 64-bit hash function
@@ -30,13 +34,18 @@ class HashTable:
 
         Implement this, and/or FNV-1.
         """
+        hash = 5381
+        for letter in key:
+            hash = ((hash << 5) + hash) + ord(letter)
+        hash = hash % self.capacity
+        return hash & 0xFFFFFFFF
 
     def hash_index(self, key):
         """
         Take an arbitrary key and return a valid integer index
         between within the storage capacity of the hash table.
         """
-        #return self.fnv1(key) % self.capacity
+        # return self.fnv1(key) % self.capacity
         return self.djb2(key) % self.capacity
 
     def put(self, key, value):
@@ -47,6 +56,9 @@ class HashTable:
 
         Implement this.
         """
+        index = self.djb2(key)
+        new_entry = HashTableEntry(key, value)
+        self.storage[index] = new_entry
 
     def delete(self, key):
         """
@@ -56,6 +68,8 @@ class HashTable:
 
         Implement this.
         """
+        index = self.djb2(key)
+        self.storage[index] = None
 
     def get(self, key):
         """
@@ -65,6 +79,11 @@ class HashTable:
 
         Implement this.
         """
+        index = self.djb2(key)
+        if self.storage[index]:
+            return self.storage[index].value
+        else:
+            return None
 
     def resize(self):
         """
@@ -74,6 +93,7 @@ class HashTable:
         Implement this.
         """
 
+
 if __name__ == "__main__":
     ht = HashTable(2)
 
@@ -82,7 +102,6 @@ if __name__ == "__main__":
     ht.put("line_3", "Linked list saves the day!")
 
     print("")
-
     # Test storing beyond capacity
     print(ht.get("line_1"))
     print(ht.get("line_2"))
