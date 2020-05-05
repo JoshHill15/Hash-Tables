@@ -1,3 +1,5 @@
+
+
 class HashTableEntry:
     """
     Hash Table entry, as a linked list node.
@@ -7,6 +9,34 @@ class HashTableEntry:
         self.key = key
         self.value = value
         self.next = None
+
+
+class LinkedList:
+    def __init__(self):
+        self.head = None
+
+    def insert(self, key, val):
+        new_node = HashTableEntry(key, val)
+        new_node.next = self.head
+        self.head = new_node
+
+    def find(self, key):
+        curr = self.head
+        while curr:
+            if curr.key == key:
+                return curr.value
+            curr = curr.next
+
+    def delete(self, key):
+        if key == self.head.key:
+            self.head = self.head.next
+        curr = self.head
+        prev = None
+        while curr:
+            if curr.key == key:
+                prev.next = curr.next
+            prev = curr
+            curr = curr.next
 
 
 class HashTable:
@@ -45,7 +75,6 @@ class HashTable:
         Take an arbitrary key and return a valid integer index
         between within the storage capacity of the hash table.
         """
-        # return self.fnv1(key) % self.capacity
         return self.djb2(key) % self.capacity
 
     def put(self, key, value):
@@ -57,8 +86,11 @@ class HashTable:
         Implement this.
         """
         index = self.djb2(key)
-        new_entry = HashTableEntry(key, value)
-        self.storage[index] = new_entry
+        if self.storage[index]:
+            self.storage[index].insert(key, value)
+        else:
+            self.storage[index] = LinkedList()
+            self.storage[index].insert(key, value)
 
     def delete(self, key):
         """
@@ -69,7 +101,7 @@ class HashTable:
         Implement this.
         """
         index = self.djb2(key)
-        self.storage[index] = None
+        self.storage[index].delete(key)
 
     def get(self, key):
         """
@@ -81,7 +113,7 @@ class HashTable:
         """
         index = self.djb2(key)
         if self.storage[index]:
-            return self.storage[index].value
+            return self.storage[index].find(key)
         else:
             return None
 
@@ -94,9 +126,6 @@ class HashTable:
         """
         self.storage = self.storage * 2
         self.capacity = self.capacity * 2
-        # for i in range(self.capacity//2):
-        #     print(i, self.storage[i].key, self.storage[i].value)
-        #     index = self.djb2(self.storage[i].key)
 
 
 if __name__ == "__main__":
@@ -107,7 +136,14 @@ if __name__ == "__main__":
     ht.put("line_3", "Linked list saves the day!")
 
     print("")
-    # Test storing beyond capacity
+    # # Test storing beyond capacity
+    print(ht.get("line_1"))
+    print(ht.get("line_2"))
+    print(ht.get("line_3"))
+
+    print("")
+    # test delete
+    ht.delete("line_3")
     print(ht.get("line_1"))
     print(ht.get("line_2"))
     print(ht.get("line_3"))
@@ -119,9 +155,19 @@ if __name__ == "__main__":
 
     print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
-    # Test if data intact after resizing
+    # # Test if data intact after resizing
     print(ht.get("line_1"))
     print(ht.get("line_2"))
     print(ht.get("line_3"))
 
     print("")
+
+    # l = LinkedList()
+    # l.insert("a", 1)
+    # l.insert("b", 2)
+    # l.insert("c", 3)
+    # l.insert("d", 4)
+    # print(l.head.key, l.head.value)
+    # print(l.head.next.key, l.head.next.value)
+    # print(l.head.next.next.key, l.head.next.next.value)
+    # print(l.head.next.next.next.key, l.head.next.next.next.value)
