@@ -1,5 +1,6 @@
 
 
+
 class HashTableEntry:
     """
     Hash Table entry, as a linked list node.
@@ -27,6 +28,13 @@ class LinkedList:
                 return curr.value
             curr = curr.next
 
+    def replace(self, key, val):
+        curr = self.head
+        while curr:
+            if curr.key == key:
+                curr.value = val
+            curr = curr.next
+
     def delete(self, key):
         if key == self.head.key:
             self.head = self.head.next
@@ -37,6 +45,20 @@ class LinkedList:
                 prev.next = curr.next
             prev = curr
             curr = curr.next
+
+    def print_all(self):
+        curr = self.head
+        while curr:
+            print("node in linked list", curr.value)
+            curr = curr.next
+
+    def all_nodes(self):
+        curr = self.head
+        arr = []
+        while curr:
+            arr.append(curr)
+            curr = curr.next
+        return arr
 
 
 class HashTable:
@@ -50,6 +72,10 @@ class HashTable:
     def __init__(self, storage):
         self.storage = [None] * storage
         self.capacity = storage
+        self.load_balance = 0
+
+    def load_balance_ratio(self):
+        return self.load_balance / self.capacity
 
     def fnv1(self, key):
         """
@@ -87,10 +113,17 @@ class HashTable:
         """
         index = self.djb2(key)
         if self.storage[index]:
-            self.storage[index].insert(key, value)
+            if self.storage[index].find(key) is not None:
+                self.storage[index].replace(key, value)
+            else:
+                self.storage[index].insert(key, value)
+                self.load_balance += 1
         else:
             self.storage[index] = LinkedList()
             self.storage[index].insert(key, value)
+            self.load_balance += 1
+        if self.load_balance_ratio() > 0.7:
+            self.double_size()
 
     def delete(self, key):
         """
@@ -101,7 +134,12 @@ class HashTable:
         Implement this.
         """
         index = self.djb2(key)
-        self.storage[index].delete(key)
+        if self.storage[index].find(key) is not None:
+            self.storage[index].delete(key)
+            self.load_balance -= 1
+
+        if self.load_balance_ratio() < 0.2 and self.capacity > 8:
+            self.half_size()
 
     def get(self, key):
         """
@@ -117,50 +155,76 @@ class HashTable:
         else:
             return None
 
-    def resize(self):
+    def double_size(self):
         """
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
 
         Implement this.
         """
-        self.storage = self.storage * 2
+        nodes = []
+        for i in range(self.capacity):
+            if self.storage[i] is not None:
+                nodes += self.storage[i].all_nodes()
         self.capacity = self.capacity * 2
+        new_storage = [None] * self.capacity
+        self.storage = new_storage
+        self.load_balance = 0
+        for node in nodes:
+            self.put(node.key, node.value)
+
+    def half_size(self):
+        nodes = []
+        for i in range(self.capacity):
+            if self.storage[i] is not None:
+                nodes += self.storage[i].all_nodes()
+        self.capacity = self.capacity // 2
+        new_storage = [None] * self.capacity
+        self.storage = new_storage
+        self.load_balance = 0
+        for node in nodes:
+            self.put(node.key, node.value)
 
 
 if __name__ == "__main__":
-    ht = HashTable(2)
+    ht = HashTable(8)
 
     ht.put("line_1", "Tiny hash table")
-    ht.put("line_2", "Filled beyond capacity")
+    ht.put("line_2", "Filled bcapacity")
     ht.put("line_3", "Linked list saves the day!")
-
-    print("")
-    # # Test storing beyond capacity
-    print(ht.get("line_1"))
-    print(ht.get("line_2"))
-    print(ht.get("line_3"))
-
-    print("")
-    # test delete
-    ht.delete("line_3")
-    print(ht.get("line_1"))
-    print(ht.get("line_2"))
-    print(ht.get("line_3"))
-
-    # Test resizing
+    ht.put("line_3", "this is new")
+    ht.put("line_4", "this is 4")
+    ht.put("line_5", "this is 5")
     old_capacity = len(ht.storage)
-    ht.resize()
+    ht.put("line_6", "this is 6")
+    print("percentage", str(ht.load_balance_ratio())+"%")
+    # print("")
+    # # # # Test storing beyond capacity
+    # print(ht.get("line_1"))
+    # print(ht.get("line_2"))
+    # print(ht.get("line_3"))
+    print("")
+    # # # # test delete
+    ht.delete("line_3")
+    # ht.delete("line_2")
+    ht.delete("line_1")
+
+    print(ht.get("line_1"))
+    print(ht.get("line_2"))
+    print(ht.get("line_3"))
+
+    print("percentage2", str(ht.load_balance_ratio())+"%")
+    # Test resizing
     new_capacity = len(ht.storage)
 
     print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
-    # # Test if data intact after resizing
-    print(ht.get("line_1"))
-    print(ht.get("line_2"))
-    print(ht.get("line_3"))
+    # # # Test if data intact after resizing
+    # print(ht.get("line_1"))
+    # print(ht.get("line_2"))
+    # print(ht.get("line_3"))
 
-    print("")
+    # print("")
 
     # l = LinkedList()
     # l.insert("a", 1)

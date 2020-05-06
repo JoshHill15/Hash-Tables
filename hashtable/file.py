@@ -1,24 +1,60 @@
 
 
+# Definition for a binary tree node.
+class TreeNode(object):
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
 
 
+class Solution(object):
+    # def isValidBST(self, root):
+    #     """
+    #     :type root: TreeNode
+    #     :rtype: bool
+    #     """
+    #     if root:
+    #         print(root.val)
+    #         if root.left:
+    #             if root.left.val < root.val:
+    #                 self.isValidBST(root.left)
+    #             else:
+    #                 return False
+    #         if root.right:
+    #             if root.right.val > root.val:
+    #                 self.isValidBST(root.right)
+    #             else:
+    #                 return False
+    #     return True
+    def isValidBST(self, root):
+        """
+        :type root: TreeNode
+        :rtype: bool
+        """
+        def helper(node, lower=float('-inf'), upper=float('inf')):
+            if not node:
+                return True
 
-# Given an object/dictionary with keys and values that consist of both strings and integers, design an algorithm to calculate and return the sum of all of the numeric values.
-# For example, given the following object/dictionary as input:
-d = {
-  "cat": "bob",
-  "dog": 23,
-  19: 18,
-  90: "fish"
-}
-# Your algorithm should return 41, the sum of the values 23 and 18.
-# You may use whatever programming language you'd like.
-# Verbalize your thought process as much as possible before writing any code. Run through the UPER problem solving framework while going through your thought process.
+            val = node.val
+            if val <= lower or val >= upper:
+                return False
+
+            if not helper(node.right, val, upper):
+                return False
+            if not helper(node.left, lower, val):
+                return False
+            return True
+
+        return helper(root)
 
 
-# sum = 0
-# for i in d:
-#   if type(d[i]) == int:
-#     sum += d[i]
+bst = TreeNode(10)
+bst.left = TreeNode(5)
+bst.right = TreeNode(15)
+bst.right.left = TreeNode(6)
+bst.right.right = TreeNode(20)
 
-# print(sum)
+sol = Solution()
+ans = sol.isValidBST(bst)
+print("^%$##", ans)
